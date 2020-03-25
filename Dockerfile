@@ -12,5 +12,3 @@ WORKDIR /physionet
 ## Do not edit if you have a requirements.txt
 RUN pip install -r requirements.txt
 
-# added a port for testing
-EXPOSE 3000
