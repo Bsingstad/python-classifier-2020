@@ -3,14 +3,11 @@
 import numpy as np
 import joblib
 from get_12ECG_features import get_12ECG_features
-<<<<<<< Updated upstream
-=======
 from keras.models import Sequential,Model,load_model
 from keras.optimizers import Adam
 from scipy.io import loadmat
-#import numpy as np, os, sys
 from keras.layers import Dense, LSTM, Dropout, TimeDistributed, Bidirectional, InputLayer, Flatten
->>>>>>> Stashed changes
+
 
 def run_12ECG_classifier(data,header_data,classes,model):
 
@@ -24,19 +21,7 @@ def run_12ECG_classifier(data,header_data,classes,model):
     label = model.predict(feats_reshape)
     score = model.predict_proba(feats_reshape)
 
-<<<<<<< Updated upstream
-    current_label[label] = 1
 
-    for i in range(num_classes):
-        current_score[i] = np.array(score[0][i])
-
-    return current_label, current_score
-
-def load_12ECG_model():
-    # load the model from disk 
-    filename='finalized_model.sav'
-    loaded_model = joblib.load(filename)
-=======
 def load_12ECG_model():
     # load the model from disk
    # model = Sequential()
@@ -63,6 +48,5 @@ def load_12ECG_model():
 
     #model.compile(loss='categorical_crossentropy', optimizer="Adam", metrics=['acc'])
     model.compile(loss='categorical_crossentropy', optimizer="SGD", metrics=['categorical_accuracy', 'categorical_crossentropy'])
->>>>>>> Stashed changes
 
     return loaded_model
