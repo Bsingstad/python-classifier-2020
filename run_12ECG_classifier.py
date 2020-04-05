@@ -6,7 +6,6 @@ from get_12ECG_features import get_12ECG_features
 from keras.models import Sequential,Model,load_model
 from keras.optimizers import Adam
 from scipy.io import loadmat
-
 from keras.layers import Dense, LSTM, Dropout, TimeDistributed, Bidirectional, InputLayer, Flatten
 
 
