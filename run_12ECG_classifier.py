@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import numpy as np
-import joblib
+#import joblib
 from get_12ECG_features import get_12ECG_features
 from keras.models import Sequential,Model,load_model
 from keras.optimizers import Adam
 from scipy.io import loadmat
+
 from keras.layers import Dense, LSTM, Dropout, TimeDistributed, Bidirectional, InputLayer, Flatten
 
 
@@ -67,5 +68,6 @@ def load_12ECG_model():
 
     #model.compile(loss='categorical_crossentropy', optimizer="Adam", metrics=['acc'])
     model.compile(loss='categorical_crossentropy', optimizer="SGD", metrics=['categorical_accuracy', 'categorical_crossentropy'])
+
 
     return model
