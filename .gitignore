@@ -127,7 +127,6 @@ dmypy.json
 
 # Pyre type checker
 
-weights_best.hdf5
 .pyre/
 
 
