@@ -12,7 +12,7 @@ from keras.layers import Dense, LSTM, Dropout, TimeDistributed, Bidirectional, I
 
 
 def run_12ECG_classifier(data,header_data,classes,model):
-    threshold = 0.16
+    threshold = 0.6
 
     #num_classes = len(classes)
     #current_label = np.zeros(num_classes, dtype=int)
@@ -73,8 +73,8 @@ def load_12ECG_model():
     model.add(LSTM(512))
     model.add(Dense(512, activation="relu"))
     model.add(Dropout(0.5))
+    model.add(Dense(9, activation='sigmoid'))
     #model.add(Dense(9, activation='softmax'))
-    model.add(Dense(9, activation='softmax'))
 
 
     model.load_weights("weights_best.hdf5")
