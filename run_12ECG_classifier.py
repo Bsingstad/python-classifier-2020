@@ -12,7 +12,7 @@ from keras.layers import Dense, LSTM, Dropout, TimeDistributed, Bidirectional, I
 
 
 def run_12ECG_classifier(data,header_data,classes,model):
-    threshold = 0.6
+    threshold = 0.4
 
     #num_classes = len(classes)
     #current_label = np.zeros(num_classes, dtype=int)
