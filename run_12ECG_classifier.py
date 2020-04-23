@@ -77,7 +77,7 @@ def load_12ECG_model():
     #model.add(Dense(9, activation='softmax'))
 
 
-    model.load_weights("weights_best.hdf5")
+    model.load_weights("weights_512_22.april.hdf5")
 
     model.compile(loss='categorical_crossentropy', optimizer="SGD", metrics=['categorical_accuracy', 'categorical_crossentropy'])
 
