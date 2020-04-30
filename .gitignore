@@ -126,4 +126,13 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
+
 .pyre/
+
+
+.idea/
+
+evaluate_12ECG_score.py
+
+input_directory/
+output_directory
