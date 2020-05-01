@@ -2,18 +2,21 @@
 
 import numpy as np
 #import joblib
+from sklearn.externals import joblib
+import pickle
+from joblib import load
 from get_12ECG_features import get_12ECG_features
 from keras.preprocessing.sequence import pad_sequences
 from keras.models import Sequential,Model,load_model
 from keras.optimizers import Adam, SGD
 from scipy.io import loadmat
 from keras.layers import Dense, LSTM, Dropout, TimeDistributed, Bidirectional, InputLayer, Flatten, Conv1D, MaxPooling1D, BatchNormalization
-
+from keras.wrappers.scikit_learn import KerasClassifier
 
 
 def run_12ECG_classifier(data,header_data,classes,model):
     # optimized thresholds:
-    threshold = [0.48336382, 0.48216414, 0.20476912, 0.51797735, 0.35201463,0.35771265, 0.61279034, 0.42107908, 0.22069441]
+    threshold = [0.004, 0.004, 0.004, 0.004, 0.004,0.004, 0.004, 0.004, 0.004]
 
 
     # Use your classifier here to obtain a label and score for each class. 
@@ -54,15 +57,20 @@ def load_12ECG_model():
     model.add(Conv1D(filters=512, kernel_size=5, activation='relu', use_bias=True))
     model.add(MaxPooling1D(pool_size=3, stride = 1, data_format="channels_last" ))
     model.add(BatchNormalization())
-    model.add(LSTM(512))
-    model.add(Dense(512, activation="relu"))
-    model.add(Dropout(0.5))
+    model.add(LSTM(512, activation= "hard_sigmoid"))
+    model.add(Dense(512, activation="softsign"))
+    model.add(Dropout(0))
     model.add(Dense(9, activation='sigmoid'))
 
+    filename = 'finalized_model.sav'
+    pickle.dump(model, open(filename, 'wb'))
+ 
+    # some time later...
+ 
+    # load the model from disk
+    model = pickle.load(open(filename, 'rb'))
 
-    model.load_weights("weights_512_23apr_1725.hdf5")
-
-    model.compile(loss='categorical_crossentropy', optimizer="SGD", metrics=['categorical_accuracy', 'categorical_crossentropy'])
+  
 
 
     return model
