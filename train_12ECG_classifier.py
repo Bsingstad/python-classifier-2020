@@ -3,6 +3,7 @@ import tensorflow as tf
 from tensorflow import keras
 import wfdb
 from sklearn.preprocessing import MultiLabelBinarizer
+import pandas as pd
 #from keras.preprocessing.sequence import pad_sequences
 import numpy as np, os, sys, joblib
 from scipy.io import loadmat
@@ -69,9 +70,9 @@ def train_12ECG_classifier(input_directory, output_directory):
     # Train model.
     print('Training model...')
 
-    model=create_model()
+    model=create_model(y)
     batchsize = 30
-    history = model.fit_generator(generator=batch_generator(batch_size=batchsize, gen_x=generate_X(), gen_y=generate_y(), gen_z=generate_z()), steps_per_epoch=(len(y)/batchsize), epochs=3)
+    history = model.fit_generator(generator=batch_generator(batch_size=batchsize, gen_x=generate_X(input_directory), gen_y=generate_y(y), gen_z=generate_z(age,gender), ohe_labels = one_hot.classes_),steps_per_epoch=(len(y)/batchsize), epochs=3)
 
     # Save model.
     print('Saving model...')
@@ -105,7 +106,7 @@ def get_classes(input_directory, filenames):
                         classes.add(c.strip())
     return sorted(classes)
 
-def create_model(): 
+def create_model(y): 
     # define two sets of inputs
     inputA = keras.layers.Input(shape=(10000,12)) 
     inputB = keras.layers.Input(shape=(2,))
@@ -153,13 +154,13 @@ def create_model():
     model.compile(loss='categorical_crossentropy', optimizer="adamax", metrics=['accuracy','categorical_accuracy',"categorical_crossentropy"])
     return model
 
-def generate_y():
+def generate_y(y):
     while True:
         for i in range(len(y)):
             y_train = y[i]
             yield y_train
 
-def generate_X():
+def generate_X(input_directory):
     while True:
         for filen in sorted(os.listdir(input_directory)):
             if filen.endswith(".mat"):
@@ -168,7 +169,7 @@ def generate_X():
                 X_train_new = X_train_new.reshape(10000,12)
                 yield X_train_new
 
-def generate_z():
+def generate_z(age, gender):
     while True:
         for i in range(len(age)):
             gen_age = age[i]
@@ -176,9 +177,9 @@ def generate_z():
             z_train = [gen_age , gen_gender]
             yield z_train
 
-def batch_generator(batch_size, gen_x,gen_y, gen_z): 
+def batch_generator(batch_size, gen_x,gen_y, gen_z, ohe_labels): 
     batch_features = np.zeros((batch_size,10000, 12))
-    batch_labels = np.zeros((batch_size,len(test_ohe)))
+    batch_labels = np.zeros((batch_size,len(ohe_labels)))
     batch_demo_data = np.zeros((batch_size,2))
     while True:
         for i in range(batch_size):
