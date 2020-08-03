@@ -25,7 +25,7 @@ def train_12ECG_classifier(input_directory, output_directory):
             ecg_filenames.append(ecgfilename)
             gender.append(header_data[14][6:-1])
             age.append(header_data[13][6:-1])
-    
+
     # Gender processing - replace with nicer code later
     gender = np.asarray(gender)
     gender[np.where(gender == "Male")] = 0
@@ -60,7 +60,7 @@ def train_12ECG_classifier(input_directory, output_directory):
 
     for i in range(len(codes_to_replace)):
         df_labels.replace(to_replace=codes_to_replace[i], inplace=True ,value=replace_with[i], regex=True)
-    
+
     # One-Hot encode classes
     one_hot = MultiLabelBinarizer()
     y=one_hot.fit_transform(df_labels[0].str.split(pat=','))
@@ -72,12 +72,12 @@ def train_12ECG_classifier(input_directory, output_directory):
 
     model=create_model(y)
     batchsize = 30
-    history = model.fit_generator(generator=batch_generator(batch_size=batchsize, gen_x=generate_X(input_directory), gen_y=generate_y(y), gen_z=generate_z(age,gender), ohe_labels = one_hot.classes_),steps_per_epoch=(len(y)/batchsize), epochs=3)
+    history = model.fit_generator(generator=batch_generator(batch_size=batchsize, gen_x=generate_X(input_directory), gen_y=generate_y(y), gen_z=generate_z(age,gender), ohe_labels = one_hot.classes_),steps_per_epoch=(len(y)/batchsize), epochs=30)
 
     # Save model.
     print('Saving model...')
 
-    model.save_weights("model_weights.h5")
+    model.save_weights("model.h5")
 
     #final_model={'model':model, 'imputer':imputer,'classes':classes}
 
@@ -106,9 +106,9 @@ def get_classes(input_directory, filenames):
                         classes.add(c.strip())
     return sorted(classes)
 
-def create_model(y): 
+def create_model(y):
     # define two sets of inputs
-    inputA = keras.layers.Input(shape=(10000,12)) 
+    inputA = keras.layers.Input(shape=(10000,12))
     inputB = keras.layers.Input(shape=(2,))
     # the first branch operates on the first input
     mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",input_shape=(10000,12),use_bias=True)(inputA)
@@ -177,7 +177,7 @@ def generate_z(age, gender):
             z_train = [gen_age , gen_gender]
             yield z_train
 
-def batch_generator(batch_size, gen_x,gen_y, gen_z, ohe_labels): 
+def batch_generator(batch_size, gen_x,gen_y, gen_z, ohe_labels):
     batch_features = np.zeros((batch_size,10000, 12))
     batch_labels = np.zeros((batch_size,len(ohe_labels)))
     batch_demo_data = np.zeros((batch_size,2))
