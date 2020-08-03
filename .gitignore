@@ -132,3 +132,5 @@ dmypy.json
 #PyCharm files
 
 .idea/
+
+input_dir/
