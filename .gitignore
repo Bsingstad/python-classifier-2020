@@ -134,5 +134,5 @@ dmypy.json
 
 evaluate_12ECG_score.py
 
-input_directory/
-output_directory
+input_dir/
+output_dir
