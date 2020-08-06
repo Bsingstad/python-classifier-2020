@@ -20,7 +20,7 @@ def train_12ECG_classifier(input_directory, output_directory):
     ecg_filenames=[]
     for ecgfilename in sorted(os.listdir(input_directory)):
         if ecgfilename.endswith(".mat"):
-            data, header_data = load_challenge_data(input_directory+ecgfilename)
+            data, header_data = load_challenge_data(input_directory+"/"+ecgfilename)
             labels.append(header_data[15][5:-1])
             ecg_filenames.append(ecgfilename)
             gender.append(header_data[14][6:-1])
@@ -164,7 +164,7 @@ def generate_X(input_directory):
     while True:
         for filen in sorted(os.listdir(input_directory)):
             if filen.endswith(".mat"):
-                data, header_data = load_challenge_data(input_directory+filen)
+                data, header_data = load_challenge_data(input_directory+"/"+filen)
                 X_train_new = keras.preprocessing.sequence.pad_sequences(data, maxlen=10000, truncating='post',padding="post")
                 X_train_new = X_train_new.reshape(10000,12)
                 yield X_train_new
