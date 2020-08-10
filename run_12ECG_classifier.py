@@ -113,6 +113,6 @@ def run_12ECG_classifier(data,header_data,loaded_model):
 
 def load_12ECG_model(model_input):
     loaded_model=create_model()
-    loaded_model.load_weights("model_weights.h5")
+    loaded_model.load_weights("model.h5")
 
     return loaded_model
