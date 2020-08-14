@@ -127,6 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-input_dir/
+.idea/
+input_directory/
 output_dir/

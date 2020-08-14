@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import numpy as np, os, sys
 import joblib
 from get_12ECG_features import get_12ECG_features
@@ -9,6 +8,7 @@ from tensorflow import keras
 import numpy as np, os, sys, joblib
 from scipy.io import loadmat
 from get_12ECG_features import get_12ECG_features
+
 
 
 def create_model(): 
@@ -112,7 +112,9 @@ def run_12ECG_classifier(data,header_data,loaded_model):
     return binary_prediction, score, classes
 
 def load_12ECG_model(model_input):
-    loaded_model=create_model()
-    loaded_model.load_weights("model.h5")
+    model = create_model()
+    f_out='model.h5'
+    filename = os.path.join(model_input,f_out)
+    model.load_weights(filename)
 
-    return loaded_model
+    return model

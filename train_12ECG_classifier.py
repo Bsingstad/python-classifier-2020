@@ -72,12 +72,13 @@ def train_12ECG_classifier(input_directory, output_directory):
 
     model=create_model(y)
     batchsize = 30
-    history = model.fit_generator(generator=batch_generator(batch_size=batchsize, gen_x=generate_X(input_directory), gen_y=generate_y(y), gen_z=generate_z(age,gender), ohe_labels = one_hot.classes_),steps_per_epoch=(len(y)/batchsize), epochs=30)
+    history = model.fit_generator(generator=batch_generator(batch_size=batchsize, gen_x=generate_X(input_directory), gen_y=generate_y(y), gen_z=generate_z(age,gender), ohe_labels = one_hot.classes_),steps_per_epoch=(len(y)/batchsize), epochs=1)
 
     # Save model.
     print('Saving model...')
-
-    model.save_weights("model.h5")
+    #model.save("model.h5")
+    filename = os.path.join(output_directory, 'model.h5')
+    model.save_weights(filename)
 
     #final_model={'model':model, 'imputer':imputer,'classes':classes}
 
