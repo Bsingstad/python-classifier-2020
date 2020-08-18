@@ -5,8 +5,6 @@ Cython==0.29.13
 pandas==0.25.3
 scikit-learn==0.21.3
 h5py==2.10.0
-#tensorboard==1.13.1
-tensorflow==2.2.0
-#tensorflow-estimator==1.13.0
+tensorflow==2.3.0
 tqdm==4.28.1
 wfdb==2.2.1

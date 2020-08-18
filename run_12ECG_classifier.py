@@ -1,74 +1,71 @@
 #!/usr/bin/env python
-import numpy as np, os, sys
+import numpy as np, os, sys, joblib
 import joblib
-from get_12ECG_features import get_12ECG_features
 import tensorflow as tf
 from tensorflow import keras
-#from keras.preprocessing.sequence import pad_sequences
-import numpy as np, os, sys, joblib
 from scipy.io import loadmat
-from get_12ECG_features import get_12ECG_features
+
+
 
 
 
 def create_model(): 
     # define two sets of inputs
-    inputA = keras.layers.Input(shape=(10000,12)) 
+    inputA = keras.layers.Input(shape=(5000,12)) 
     inputB = keras.layers.Input(shape=(2,))
-    # the first branch operates on the first input
-    mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",input_shape=(10000,12),use_bias=True)(inputA)
-    mod1 = keras.layers.MaxPool1D(pool_size=5, strides=3,data_format="channels_last")(mod1)
-    mod1 = keras.layers.BatchNormalization()(mod1)
-    mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",use_bias=True)(mod1)
-    mod1 = keras.layers.MaxPool1D(pool_size=5, strides=3,data_format="channels_last")(mod1)
-    mod1 = keras.layers.BatchNormalization()(mod1)
-    mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",use_bias=True)(mod1)
-    mod1 = keras.layers.MaxPool1D(pool_size=5, strides=3,data_format="channels_last")(mod1)
-    mod1 = keras.layers.BatchNormalization()(mod1)
-    mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",use_bias=True)(mod1)
-    mod1 = keras.layers.MaxPool1D(pool_size=5, strides=3,data_format="channels_last")(mod1)
-    mod1 = keras.layers.BatchNormalization()(mod1)
-    mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",use_bias=True)(mod1)
-    mod1 = keras.layers.MaxPool1D(pool_size=5, strides=3,data_format="channels_last")(mod1)
-    mod1 = keras.layers.BatchNormalization()(mod1)
-    mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",use_bias=True)(mod1)
-    mod1 = keras.layers.MaxPool1D(pool_size=5, strides=3,data_format="channels_last")(mod1)
-    mod1 = keras.layers.BatchNormalization()(mod1)
-    mod1 = keras.layers.Conv1D(filters=512, kernel_size=5, activation="relu",use_bias=True)(mod1)
-    mod1 = keras.layers.MaxPool1D(pool_size=3, strides=1,data_format="channels_last")(mod1)
-    mod1 = keras.layers.BatchNormalization()(mod1)
-    mod1 = keras.layers.LSTM(512, activation="hard_sigmoid")(mod1)
-    mod1 = keras.layers.Dense(512, activation="softsign")(mod1)
-    mod1 = keras.layers.Dropout(0)(mod1)
-    mod1 = keras.layers.Dense(25, activation='sigmoid')(mod1)
-    mod1 = keras.Model(inputs=inputA, outputs=mod1)
 
-    # the second branch opreates on the second input
-    mod2 = keras.layers.Dense(2, activation="relu")(inputB)
+    conv1 = keras.layers.Conv1D(filters=128, kernel_size=8,input_shape=(5000,12), padding='same')(inputA)
+    conv1 = keras.layers.BatchNormalization()(conv1)
+    conv1 = keras.layers.Activation(activation='relu')(conv1)
+
+    conv2 = keras.layers.Conv1D(filters=256, kernel_size=5, padding='same')(conv1)
+    conv2 = keras.layers.BatchNormalization()(conv2)
+    conv2 = keras.layers.Activation('relu')(conv2)
+
+    conv3 = keras.layers.Conv1D(128, kernel_size=3,padding='same')(conv2)
+    conv3 = keras.layers.BatchNormalization()(conv3)
+    conv3 = keras.layers.Activation('relu')(conv3)
+
+    gap_layer = keras.layers.GlobalAveragePooling1D()(conv3)
+
+    output_layer = keras.layers.Dense(24, activation='sigmoid')(gap_layer) #HUSK Å SETTE TIL 24
+    
+    mod1 = keras.Model(inputs=inputA, outputs=output_layer)
+        #mod1 = keras.layers.add([mod1,mod1_shortcut])
+        # the second branch opreates on the second input
+    mod2 = keras.layers.Dense(100, activation="relu")(inputB) # 2 -> 100
+    mod2 = keras.layers.Dense(50, activation="relu")(mod2) # Added this layer
     mod2 = keras.Model(inputs=inputB, outputs=mod2)
-    # combine the output of the two branches
+        # combine the output of the two branches
     combined = keras.layers.concatenate([mod1.output, mod2.output])
-    # apply a FC layer and then a regression prediction on the
-    # combined outputs
-    z = keras.layers.Dense(25, activation="sigmoid")(combined)
+        # apply a FC layer and then a regression prediction on the
+        # combined outputs
+        
+    z = keras.layers.Dense(24, activation="sigmoid")(combined) #HUSK Å SETTE TIL 24
 
-    # our model will accept the inputs of the two branches and
-    # then output a single value
+        # our model will accept the inputs of the two branches and
+        # then output a single value
     model = keras.Model(inputs=[mod1.input, mod2.input], outputs=z)
-    #@title Plot model for better visualization
-    #plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
-    model.compile(loss='categorical_crossentropy', optimizer="adamax", metrics=['accuracy','categorical_accuracy',"categorical_crossentropy"])
+
+    model.compile(loss=tf.keras.losses.BinaryCrossentropy(), optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), metrics=[tf.keras.metrics.BinaryAccuracy(
+        name='accuracy', dtype=None, threshold=0.5), tf.keras.metrics.AUC(num_thresholds=200, curve="ROC", summation_method="interpolation",
+        name="AUC", multi_label=True, label_weights=None)])
     return model
 
 
 def run_12ECG_classifier(data,header_data,loaded_model):
+    
+    #HUSK Å SETTE TIL UNCOMMENTE threshold
 
-    threshold = [0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004,
-     0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004, 0.004]
+    threshold = np.array([0.21551216, 0.20299779, 0.0955278 , 0.17289791, 0.18090656, 0.2227711 , 0.16741777, 0.22866722, 
+    0.27118915, 0.23771854, 0.0912293 , 0.09410764, 0.20950935, 0.34517996, 0.02659288, 0.23399662, 0.15980351, 0.16177394,
+    0.20402484, 0.25333636, 0.25657814, 0.22106934, 0.45621441, 0.0743871])
+
+
     # Use your classifier here to obtain a label and score for each class.
     model = loaded_model
-    padded_signal = keras.preprocessing.sequence.pad_sequences(data, maxlen=10000, truncating='post',padding="post")
-    reshaped_signal = padded_signal.reshape(1,10000,12)
+    padded_signal = keras.preprocessing.sequence.pad_sequences(data, maxlen=5000, truncating='post',padding="post")
+    reshaped_signal = padded_signal.reshape(1,5000,12)
 
     gender = header_data[14][6:-1]
     age=header_data[13][6:-1]
@@ -105,9 +102,8 @@ def run_12ECG_classifier(data,header_data,loaded_model):
     binary_prediction = binary_prediction * 1
     classes = ['10370003', '111975006', '164889003', '164890007', '164909002', '164917005',
  '164934002', '164947007', '17338001', '251146004', '270492004', '39732003',
- '426177001', '426627000', '426783006', '427084000', '427393009', '445118002',
- '47665007', '59118001', '59931005', '63593006', '698252002', '713426002',
- 'undefined class']
+ '426177001', '426627000', '426783006' ,'427084000' ,'427393009', '445118002',
+ '47665007' ,'59118001', '59931005', '63593006', '698252002', '713426002']
 
     return binary_prediction, score, classes
 

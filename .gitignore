@@ -130,3 +130,6 @@ dmypy.json
 .idea/
 input_directory/
 output_dir/
+input_dir_colab/
+input_pred/
+model/
